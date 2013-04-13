@@ -64,22 +64,15 @@ define(['kinetic', 'game-settings', 'map'], function(k, game, map) {
 				};
 				
 				var imageObj = new Image();
-				
-		
-					badguy = new k.Sprite({
-			        	x: this.posX, 
-								y: this.posY,
-			          image: imageObj,
-			          animation: 'bouncing',
-			          animations: animations,
-			          frameRate: 10,
-			          index: 0
-			    });
-
-				//	game.baddylayer.add(badguy);
-				//	game.stage.add(game.baddylayer);
-				//	console.log(badguy + "this is it");
-					//badguy.start();
+				badguy = new k.Sprite({
+		        	x: this.posX, 
+							y: this.posY,
+		          image: imageObj,
+		          animation: 'bouncing',
+		          animations: animations,
+		          frameRate: 10,
+		          index: 0
+		    });
 			
 				imageObj.src = 'sprites/test_ball.png';
 		  	return badguy;

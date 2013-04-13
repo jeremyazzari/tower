@@ -84,6 +84,7 @@ define(['jquery', 'kinetic', 'game-settings'], function($, k, game) {
 								break;
 		        case 0:
 								var fillcolor = 'pink';
+								var hovercolor= 'lightgreen';
 								break;
 		        default:
 		            //context.clearRect(x*squareWidth,y*squareHeight,squareWidth,squareHeight);
@@ -95,9 +96,26 @@ define(['jquery', 'kinetic', 'game-settings'], function($, k, game) {
 	        y: y * game.settings.gridSquares,
 	        width: game.settings.gridSquares,
 	        height: game.settings.gridSquares,
+					listening: true,
 	        fill: fillcolor,
 	      });
+	
+				$this = this;
 				
+				rect.on('mouseover', function() {
+			     this.setFill(hovercolor);
+					 $this.layer.draw();
+	      });
+	      rect.on('mouseout', function() {
+	         this.setFill(fillcolor);
+					 $this.layer.draw();
+	      });
+	      rect.on('mousedown', function() {
+	       
+	      });
+	      rect.on('mouseup', function() {
+	       
+	      });
 	      // add the shape to the layer
 	      this.group.add(rect);
     }	
