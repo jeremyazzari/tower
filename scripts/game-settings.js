@@ -14,6 +14,7 @@ define(['kinetic'], function(k) {
 
 	return {
 		uilayer: new k.Layer(),
+		bulletlayer: new k.Layer(),
 		messagelayer: new k.Layer(),
 		towerlayer: new k.Layer(),
 		baddylayer: new k.Layer(),

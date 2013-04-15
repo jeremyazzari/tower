@@ -1,3 +1,25 @@
+/*
+  This is good for checking if one object collides with another!!
+	
+	points = [];
+	pointsKey = 0;
+	for(i=0; i<ranges[Tower.range].length; i++) {
+		var globalpoints = ranges[Tower.range][i];
+		points[pointsKey] = Math.round(globalpoints.x) + Tower.posX;
+		points[pointsKey+1] = Math.round(globalpoints.y) + Tower.posY;
+		pointsKey += 2;
+	}
+	console.log(points);
+	var player = new Kinetic.Layer();
+  var poly = new Kinetic.Polygon({
+    points: points,
+    fill: 'rgb(200,200,200)',
+  });
+  // add the shape to the layer
+  player.add(poly);
+  // add the layer to the stage
+  game.stage.add(player);
+*/
 define(['game-settings'], function(game) {
 	
 	var radiuss = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15];
@@ -25,4 +47,5 @@ define(['game-settings'], function(game) {
 	
 	var ranges = setRangePoints();
 	return ranges;
+
 });

@@ -5,31 +5,15 @@ require(['jquery','kinetic','game-settings', 'map', 'baddy', 'tower', 'ranges'],
 	var baddys = [];
 	var baddysprites = [];
 	
-	var Tower = new tower({posX:300, posY:300, range:1 });
+	var Tower = new tower({posX:320, posY:300, range:2 });
 	tsp = Tower.getSprite();
 	game.towerlayer.add(tsp);
-	
-	points = [];
-	pointsKey = 0;
-	for(i=0; i<ranges[Tower.range].length; i++) {
-		var globalpoints = ranges[Tower.range][i];
-		points[pointsKey] = Math.round(globalpoints.x) + Tower.posX;
-		points[pointsKey+1] = Math.round(globalpoints.y) + Tower.posY;
-		pointsKey += 2;
-	}
-	console.log(points);
-	var player = new Kinetic.Layer();
-  var poly = new Kinetic.Polygon({
-    points: points,
-    fill: 'rgb(200,200,200)',
-  });
-  // add the shape to the layer
-  player.add(poly);
-  // add the layer to the stage
-  game.stage.add(player);
+
 	
 	game.stage.add(game.towerlayer);
-		tsp.start();
+	game.stage.add(game.bulletlayer);
+	tsp.start();
+	
 	for(i=0; i<10; i++) {
 		baddys[i] = new baddy({map:map, speed:2});
 		baddysprites[i] = baddys[i].getSprite();
@@ -41,8 +25,74 @@ require(['jquery','kinetic','game-settings', 'map', 'baddy', 'tower', 'ranges'],
 	var running;
 	var animatingcount = 0;
 	var pace = 1;
+	var bullets = [];
+	speed = 10;
 	
-	var anim = new k.Animation(function(frame) {
+	function Bullet(destinationX, destinationY) {
+	    this.x = tsp.getX() + (game.settings.gridSquares / 2);
+	    this.y = tsp.getY() + (game.settings.gridSquares / 2);
+
+	    var targetX = destinationX - this.x,
+	        targetY = destinationY - this.y,
+	        distance = Math.sqrt(targetX * targetX + targetY * targetY);
+
+	    this.velX = (targetX / distance) * speed;
+	    this.velY = (targetY / distance) * speed;
+	    this.finished = false;
+
+	    this.projectile = new Kinetic.Circle({
+	        x: this.x,
+	        y: this.y,
+	        radius: 2,
+	        fill: 'black',
+	        name: 'projectile'
+	    });
+
+	    this.draw = function (index) {
+
+	        this.x += this.velX;
+	        this.y += this.velY;
+
+	        var mayDelete = false;
+	        this.projectile.setAbsolutePosition(this.x, this.y);
+					
+
+	        if (mayDelete == true) {
+	            this.projectile.remove();
+	            bullets.splice(index, 1);
+	        }
+
+	       game.bulletlayer.draw();
+	    }
+	}
+	
+	function fireBullet(baddy) {
+	   bullet = new Bullet(baddy.getX()+(game.settings.gridSquares/2), baddy.getY()+(game.settings.gridSquares/2));
+	   game.bulletlayer.add(bullet.projectile);
+	   bullets.push(bullet);
+	}
+	
+	interval = 1;
+	var bulletsamimation = new k.Animation( function(frame) {
+		var time = frame.time;
+		for (i=0; i<baddys.length; i++) {
+		
+			if(Tower.inRange(baddysprites[i]) && (time - Tower.lastShot > Tower.fireSpeed  || Tower.lastShot == 0)){
+				Tower.lastShot = time;
+				fireBullet(baddysprites[i]); 
+			}
+			
+		}
+	
+		if (bullets.length > 0) {
+       for (var i = 0; i < bullets.length; i++) {
+           bullets[i].draw(i);
+       }	
+		}
+		
+	},game.bulletlayer);
+	
+	var anim = new k.Animation( function(frame) {
 			var time = frame.time,
 			timeDiff = frame.timeDiff,
 			frameRate = frame.frameRate;
@@ -72,6 +122,7 @@ require(['jquery','kinetic','game-settings', 'map', 'baddy', 'tower', 'ranges'],
 					
 				}
 				
+	
 			}// close baddy animation loop
 			
 			if(animatingcount < baddys.length && time >= pace * 2000) {
@@ -81,6 +132,7 @@ require(['jquery','kinetic','game-settings', 'map', 'baddy', 'tower', 'ranges'],
 			
 		}, game.baddylayer);
 		
+		bulletsamimation.start();
     anim.start();
 
 	

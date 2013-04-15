@@ -110,7 +110,6 @@ define(['kinetic', 'game-settings', 'map'], function(k, game, map) {
 				}
 				else if(map.data[ map.path[ this.currNode ][1] ][ map.path[this.currNode][0] ] == 3) {
 					this.endpath = true;
-					console.log(this.endpath);
 				}
 				
 				return{x:this.posX, y:this.posY};
