@@ -12,7 +12,7 @@ define(['kinetic', 'game-settings', 'map'], function(k, game, map) {
 			this.width = game.settings.gridSquares * this.sizeW;
 			this.type = settings.type || 'basic';
 			this.level = settings.level || 0;
-			this.hitPoints = settings.hp || 10;
+			this.hitPoints = settings.hitPoints || 10;
 			this.bounty = settings.bounty || {gold: 10, points: 20};
 			this.speed  = settings.speed || 2;
 		}

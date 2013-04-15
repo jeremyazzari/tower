@@ -1,8 +1,8 @@
 define(['kinetic'], function(k) {
 	
   var settings = {
-		cols : 100,
-	  rows : 100,
+		cols : 20,
+	  rows : 14,
 	  gridSquares : 40,
 	};
 	

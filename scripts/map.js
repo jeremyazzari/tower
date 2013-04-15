@@ -1,4 +1,5 @@
-define(['jquery', 'kinetic', 'game-settings'], function($, k, game) {
+define(['jquery', 'kinetic', 'game-settings','ui', 'level'], function($,k, game,ui, level) {
+
 	
 	var map = {
 		layer: new k.Layer(),
@@ -117,7 +118,7 @@ define(['jquery', 'kinetic', 'game-settings'], function($, k, game) {
 	       
 	      });
 	      rect.on('mouseup', function() {
-	       
+	       ui.buildMenu(rect.getX(), rect.getY());
 	      });
 	      // add the shape to the layer
 	      this.group.add(rect);

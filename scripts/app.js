@@ -1,4 +1,4 @@
-require(['kinetic','game-settings', 'map', 'baddy', 'tower','utility'], function(k, game, map, baddy, tower, utility) {
+require(['kinetic','game-settings', 'map', 'baddy', 'tower','utility', 'level'], function(k, game, map, baddy, tower, utility, level) {
 	//add the map to stage.
 	game.stage.add(map.createmap());
 	/* testing Baddys */
@@ -6,7 +6,7 @@ require(['kinetic','game-settings', 'map', 'baddy', 'tower','utility'], function
 	var baddysprites = [];
 	
 	for(i=0; i<10; i++) {
-		baddys[i] = new baddy({map:map, speed:2});
+		baddys[i] = new baddy({map:map, speed:2, hitPoints:50});
 		baddysprites[i] = baddys[i].getSprite();
 		game.baddylayer.add(baddysprites[i]);
 		baddysprites[i].hide();
@@ -14,17 +14,9 @@ require(['kinetic','game-settings', 'map', 'baddy', 'tower','utility'], function
 
 	
 	/* testing Towers*/
-	var Towers = [];
-  Towers[0] = new tower({posX:320, posY:300, range:3 });
-	Towers[1] = new tower({posX:280, posY:340, range:3 });
-	Towers[2] = new tower({posX:240, posY:340, range:3 });
-	Towers[3] = new tower({posX:280, posY:380, range:4 });
-	Towers[4] = new tower({posX:240, posY:380, range:4 });
-	for(i=0; i<Towers.length; i++) {
-		tsp = Towers[i].getSprite();
-		game.towerlayer.add(tsp);
-		tsp.start();
-	}
+	var Towers = level.towers;
+	level.refresh();
+	
 	
 	imgBullet = new Image();
 	imgBullet.src = 'sprites/bullet.gif';
@@ -63,7 +55,7 @@ require(['kinetic','game-settings', 'map', 'baddy', 'tower','utility'], function
 	
 	    this.draw = function (index) {
 				// check if bullet hit target.
-				if(this.x < 0 || this.x > 20*game.settings.gridSquares || this.Y < 0 || this.Y > 15*game.settings.gridSquares) {
+				if(this.x <= 0 || this.x >= 20*game.settings.gridSquares || this.Y <= 0 || this.Y >= 10*game.settings.gridSquares) {
 					this.finished = true;
 				}
 				if (this.hitTarget == true || this.finished == true) {
@@ -76,7 +68,7 @@ require(['kinetic','game-settings', 'map', 'baddy', 'tower','utility'], function
 	        this.y += this.velY;	   
 	        this.projectile.setAbsolutePosition(this.x, this.y);
 			  }
-
+			
 	    }
 	}
 	
@@ -89,17 +81,26 @@ require(['kinetic','game-settings', 'map', 'baddy', 'tower','utility'], function
 
 	
 // Main animation loop.
+
 	
 	var animatingcount = 0; //incrementer for the number of baddys in the animating array;
 	var pace = 1; //incrementer for spacing out the baddys.
 	var anim = new k.Animation( function(frame) {
+		frame.frameRate = 20;
 			var time = frame.time,
 			timeDiff = frame.timeDiff,
 			frameRate = frame.frameRate;
-	 
+	 	
 			for(i = 0; i<animatingcount ; i++) {
+				//best place so far to animate bullets!
+				baddyX = baddysprites[i].getX();
+				baddyY = baddysprites[i].getY();
+				animateBullets(baddyX, baddyY, i);
+			  game.bulletlayer.draw();
+			
 				if(baddys.length > 0) {
 					if(baddys[i].endpath || baddys[i].hitPoints < 1) {
+					
 						if(baddys[i].hitPoints < 1) {
 							baddys[i].dead = true;
 						}
@@ -126,15 +127,11 @@ require(['kinetic','game-settings', 'map', 'baddy', 'tower','utility'], function
 				}
 			}// close baddy animation loop
 			
-			if(baddy.length <= 0 ) {
-				if(bullets.length <= 0) { 
+			if(animatingcount < 0 ) {	
+					game.bulletlayer.removeChildren();
 					this.stop();
-				} 
-				else {
-					animateBullets();
-				}		
 			}
-			
+	
 			if(animatingcount < baddys.length && time >= pace * 2000) {
 				pace++;
 				animatingcount++;
@@ -147,15 +144,17 @@ require(['kinetic','game-settings', 'map', 'baddy', 'tower','utility'], function
 			//check if baddys in range.
 			baddyX = baddysprites[index].getX();
 			baddyY = baddysprites[index].getY();
+			
+			Towers = level.towers;
 			if(Towers.length > 0) {
 				for(k=0; k < Towers.length; k++) {
 					if(Towers[k].inRange(baddysprites[index]) && (time - Towers[k].lastShot > Towers[k].fireSpeed  || Towers[k].lastShot == 0)){
 						Towers[k].lastShot = time;
-						fireBullet(baddyX, baddyY,Towers[k].posX, Towers[k].posY, Towers[k].damage, 3); 
+						fireBullet(baddyX, baddyY,Towers[k].posX, Towers[k].posY, Towers[k].damage, 4); 
 					}
 				}
 			}
-			animateBullets(baddyX, baddyY, index);
+			
 		}
 		
 		//function to animate all bullets.
@@ -168,18 +167,21 @@ require(['kinetic','game-settings', 'map', 'baddy', 'tower','utility'], function
 							baddys[index].hitPoints -= bullets[j].damage;
 					}
 					//sets bullet location.
-		      bullets[j].draw(j);
+		  		bullets[j].draw(j);
+					//game.bulletlayer.draw();
 		  	}
 			 // redraw bullet layer.
-			 game.bulletlayer.draw();
+			 // have to do it here or the game freaks out.
+
 			}
 		}
 			//end bullet animation
-		game.stage.add(game.towerlayer);
-		game.stage.add(game.baddylayer);
-		game.stage.add(game.bulletlayer);
 		
-		//bulletsamimation.start();
+		game.stage.add(game.baddylayer);
+		game.stage.add(game.towerlayer);
+		game.stage.add(game.bulletlayer);
+		game.stage.add(game.uilayer);
+
     anim.start();
 
 	
