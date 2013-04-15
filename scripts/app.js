@@ -5,7 +5,7 @@ require(['kinetic','game-settings', 'map', 'baddy', 'tower','utility', 'level'],
 	var baddys = [];
 	var baddysprites = [];
 	
-	for(i=0; i<10; i++) {
+	for(i=0; i<100; i++) {
 		baddys[i] = new baddy({map:map, speed:2, hitPoints:50});
 		baddysprites[i] = baddys[i].getSprite();
 		game.baddylayer.add(baddysprites[i]);
@@ -55,6 +55,7 @@ require(['kinetic','game-settings', 'map', 'baddy', 'tower','utility', 'level'],
 	
 	    this.draw = function (index) {
 				// check if bullet hit target.
+					
 				if(this.x <= 0 || this.x >= 20*game.settings.gridSquares || this.Y <= 0 || this.Y >= 10*game.settings.gridSquares) {
 					this.finished = true;
 				}
@@ -78,15 +79,23 @@ require(['kinetic','game-settings', 'map', 'baddy', 'tower','utility', 'level'],
 	   bullets.push(bullet);
 	}
 	
-
+	var bullanim = new k.Animation( function(frame) { 
+		if(bullets.length > 0) {
+			for (var j = 0; j < bullets.length; j++) {
+				//check for bullet collisions.
+				bullets[j].draw(j);
+		 	}
+			game.bulletlayer.draw();
+		}
+	}, game.bulletlayer);
 	
 // Main animation loop.
-
+bullanim.start();
 	
 	var animatingcount = 0; //incrementer for the number of baddys in the animating array;
 	var pace = 1; //incrementer for spacing out the baddys.
+	
 	var anim = new k.Animation( function(frame) {
-		frame.frameRate = 20;
 			var time = frame.time,
 			timeDiff = frame.timeDiff,
 			frameRate = frame.frameRate;
@@ -95,12 +104,11 @@ require(['kinetic','game-settings', 'map', 'baddy', 'tower','utility', 'level'],
 				//best place so far to animate bullets!
 				baddyX = baddysprites[i].getX();
 				baddyY = baddysprites[i].getY();
-				animateBullets(baddyX, baddyY, i);
-			  game.bulletlayer.draw();
+				bulletCollisions(i);
+			  //game.bulletlayer.draw();
 			
 				if(baddys.length > 0) {
 					if(baddys[i].endpath || baddys[i].hitPoints < 1) {
-					
 						if(baddys[i].hitPoints < 1) {
 							baddys[i].dead = true;
 						}
@@ -111,7 +119,6 @@ require(['kinetic','game-settings', 'map', 'baddy', 'tower','utility', 'level'],
 						baddys.splice(i,1);
 						animatingcount--;
 						i--;
-
 					} else {
 						// the baddy is in play, animate baddy.
 						if (baddysprites[i].getVisible() == false) {
@@ -150,7 +157,7 @@ require(['kinetic','game-settings', 'map', 'baddy', 'tower','utility', 'level'],
 				for(k=0; k < Towers.length; k++) {
 					if(Towers[k].inRange(baddysprites[index]) && (time - Towers[k].lastShot > Towers[k].fireSpeed  || Towers[k].lastShot == 0)){
 						Towers[k].lastShot = time;
-						fireBullet(baddyX, baddyY,Towers[k].posX, Towers[k].posY, Towers[k].damage, 4); 
+						fireBullet(baddyX, baddyY,Towers[k].posX, Towers[k].posY, Towers[k].damage, 5); 
 					}
 				}
 			}
@@ -158,21 +165,18 @@ require(['kinetic','game-settings', 'map', 'baddy', 'tower','utility', 'level'],
 		}
 		
 		//function to animate all bullets.
-		function animateBullets(baddyX, baddyY, index) {
+		function bulletCollisions(index) {
 			if (bullets.length > 0) {
-		   	for (var j = 0; j < bullets.length; j++) {
+		   	for (var i = 0; i < bullets.length; i++) {
+					baddyX = game.baddylayer.children[index].getX();
+					baddyY = game.baddylayer.children[index].getY();
 					//check for bullet collisions.
-				 	if(utility.isInCircle(bullets[j].x, bullets[j].y, baddyX, baddyY, game.settings.gridSquares/1.5)) {
-					 		bullets[j].hitTarget = true;
-							baddys[index].hitPoints -= bullets[j].damage;
+				 	if(utility.isInCircle(bullets[i].x, bullets[i].y, baddyX, baddyY, game.settings.gridSquares/1.9)) {
+					 		bullets[i].hitTarget = true;
+							baddys[index].hitPoints -= bullets[i].damage;
+							bullets[i].draw(i);
 					}
-					//sets bullet location.
-		  		bullets[j].draw(j);
-					//game.bulletlayer.draw();
 		  	}
-			 // redraw bullet layer.
-			 // have to do it here or the game freaks out.
-
 			}
 		}
 			//end bullet animation
@@ -180,7 +184,6 @@ require(['kinetic','game-settings', 'map', 'baddy', 'tower','utility', 'level'],
 		game.stage.add(game.baddylayer);
 		game.stage.add(game.towerlayer);
 		game.stage.add(game.bulletlayer);
-		game.stage.add(game.uilayer);
 
     anim.start();
 

@@ -1,7 +1,7 @@
 define(['game-settings','tower'], function(game,tower){
 	//TODO: Replace with persistant solution.
 
-		var Towers = []
+		var Towers = [];
 	/*	Towers[0] = new tower({posX:320, posY:300, range:3 });
 		Towers[1] = new tower({posX:280, posY:340, range:3 });
 		Towers[2] = new tower({posX:240, posY:340, range:3 });
@@ -12,7 +12,7 @@ define(['game-settings','tower'], function(game,tower){
 		return {
 			towers: Towers,
 			addTower: function (x,y) {
-				newTower =  new tower({posX:x, posY:y, range:4});
+				newTower =  new tower({posX:x, posY:y, range:3, speed:200});
 				this.towers[this.towers.length] = newTower;
 				tsp = newTower.getSprite();
 				game.towerlayer.add(tsp);

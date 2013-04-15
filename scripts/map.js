@@ -119,6 +119,7 @@ define(['jquery', 'kinetic', 'game-settings','ui', 'level'], function($,k, game,
 	      });
 	      rect.on('mouseup', function() {
 	       ui.buildMenu(rect.getX(), rect.getY());
+				 game.stage.add($this.layer);
 	      });
 	      // add the shape to the layer
 	      this.group.add(rect);

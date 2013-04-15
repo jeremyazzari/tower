@@ -20,13 +20,16 @@ define(['kinetic', 'tower', 'game-settings', 'level'],function(k, tower, game, l
 			$this = this;
 			
       addButton.on('mouseout', function() {
-         this.remove();
-				 $this.layer.draw();
+				this.remove()
+        $this.layer.remove();
+				//$this.layer.draw();
       });
+
       addButton.on('mouseup', function() {
-       $this.buildTower(this.getX(),this.getY(),'basic');
+	     $this.buildTower(this.getX(),this.getY(),'basic');
 			 this.remove();
-			 $this.layer.draw();
+			 $this.layer.remove();
+			 //this.remove();
       });
 
 			group.add(addButton);
