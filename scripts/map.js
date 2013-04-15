@@ -49,6 +49,9 @@ define(['jquery', 'kinetic', 'game-settings'], function($, k, game) {
 		},
 		
 		getPath :function () {
+			// TODO
+			// Modify path finding algorithim to account for forks in the path.
+			//
 			var currY = this.spawnY;
 			var currX = this.spawnX;
 			var closed = [[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[]];//dumb.
@@ -74,7 +77,7 @@ define(['jquery', 'kinetic', 'game-settings'], function($, k, game) {
 		drawSquare: function(x,y,type){   
 		    switch(type){ // if brick is still visible; three colors for three types of bricks
 		        case 1:
-		            var fillcolor = 'lightblue';
+		            var fillcolor = 'lightgrey';
 		            break;  
 		        case 2:
 		            var fillcolor = 'yellow';
@@ -83,7 +86,7 @@ define(['jquery', 'kinetic', 'game-settings'], function($, k, game) {
 								var fillcolor = 'yellow';
 								break;
 		        case 0:
-								var fillcolor = 'pink';
+								var fillcolor = 'darkgrey';
 								var hovercolor= 'lightgreen';
 								break;
 		        default:

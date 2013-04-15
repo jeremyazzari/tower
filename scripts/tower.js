@@ -6,13 +6,14 @@ define(['kinetic', 'map', 'game-settings', 'utility'], function(k, map, game, ut
 		this.width = game.settings.gridSquares;
 		this.name = settings.name || 'basic';
 		this.range = settings.range || 2;
-		this.damage = settings.damage || 1;
+		this.damage = settings.damage || 3;
 		this.level = settings.level || 0;
-		this.fireSpeed = settings.speed || 400;
+		this.fireSpeed = settings.speed || 800;
 		this.cost = settings.cost || 80;
 	}
 
 	tower.prototype = {
+		bullets: new Array(),
 		lastShot: 0,
 		getRangeIndicator: function () {
 			var layer = game.baddylayer;

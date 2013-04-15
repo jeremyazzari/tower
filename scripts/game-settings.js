@@ -13,11 +13,11 @@ define(['kinetic'], function(k) {
       });
 
 	return {
+		towerlayer: new k.Layer(),
+		baddylayer: new k.Layer(),
 		uilayer: new k.Layer(),
 		bulletlayer: new k.Layer(),
 		messagelayer: new k.Layer(),
-		towerlayer: new k.Layer(),
-		baddylayer: new k.Layer(),
 		stage: stage,
 		settings: settings
 	}
