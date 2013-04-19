@@ -13,7 +13,7 @@ define(['kinetic', 'game-settings', 'map'], function(k, game, map) {
 			this.type = settings.type || 'basic';
 			this.level = settings.level || 0;
 			this.hitPoints = settings.hitPoints || 10;
-			this.bounty = settings.bounty || {gold: 10, points: 20};
+			this.bounty = settings.bounty || {resources: 1, points:5};
 			this.speed  = settings.speed || 2;
 		}
 			

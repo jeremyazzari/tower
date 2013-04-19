@@ -1,19 +1,20 @@
-require(['kinetic','game-settings', 'map', 'baddy', 'tower','utility', 'level'], function(k, game, map, baddy, tower, utility, level) {
+require(['kinetic','game-settings', 'map', 'baddy', 'tower','utility', 'level','ui'], function(k, game, map, baddy, tower, utility, level,ui) {
 	//add the map to stage.
 	game.stage.add(map.createmap());
+
+	ui.scoreBoardInit();
 	/* testing Baddys */
 	var baddys = [];
 	var baddysprites = [];
 	
 	for(i=0; i<100; i++) {
-		baddys[i] = new baddy({map:map, speed:2, hitPoints:50});
+		baddys[i] = new baddy({map:map, speed:2, hitPoints:24});
 		baddysprites[i] = baddys[i].getSprite();
 		game.baddylayer.add(baddysprites[i]);
 		baddysprites[i].hide();
 	}
 
-	
-	/* testing Towers*/
+	/* testing Towers from level.js */
 	var Towers = level.towers;
 	level.refresh();
 	
@@ -111,6 +112,7 @@ bullanim.start();
 					if(baddys[i].endpath || baddys[i].hitPoints < 1) {
 						if(baddys[i].hitPoints < 1) {
 							baddys[i].dead = true;
+							ui.updateScore(baddys[i].bounty);
 						}
 						// the baddy is at the end of the path or dead. remove it from the stage and array;
 						baddysprites[i].stop();
@@ -139,7 +141,7 @@ bullanim.start();
 					this.stop();
 			}
 	
-			if(animatingcount < baddys.length && time >= pace * 2000) {
+			if(animatingcount < baddys.length && time >= pace * 1000) {
 				pace++;
 				animatingcount++;
 			}
@@ -157,7 +159,7 @@ bullanim.start();
 				for(k=0; k < Towers.length; k++) {
 					if(Towers[k].inRange(baddysprites[index]) && (time - Towers[k].lastShot > Towers[k].fireSpeed  || Towers[k].lastShot == 0)){
 						Towers[k].lastShot = time;
-						fireBullet(baddyX, baddyY,Towers[k].posX, Towers[k].posY, Towers[k].damage, 5); 
+						fireBullet(baddyX, baddyY,Towers[k].posX, Towers[k].posY, Towers[k].damage, 6); 
 					}
 				}
 			}
@@ -184,7 +186,7 @@ bullanim.start();
 		game.stage.add(game.baddylayer);
 		game.stage.add(game.towerlayer);
 		game.stage.add(game.bulletlayer);
-
+		game.stage.add(game.uilayer);
     anim.start();
 
 	
