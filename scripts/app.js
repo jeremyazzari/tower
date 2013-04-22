@@ -1,17 +1,39 @@
 require(['kinetic','game-settings', 'map', 'baddy', 'tower','utility', 'level','ui'], function(k, game, map, baddy, tower, utility, level,ui) {
 	//add the map to stage.
 	game.stage.add(map.createmap());
-
 	ui.scoreBoardInit();
+	
 	/* testing Baddys */
 	var baddys = [];
 	var baddysprites = [];
 	
 	for(i=0; i<100; i++) {
 		baddys[i] = new baddy({map:map, speed:2, hitPoints:24});
-		baddysprites[i] = baddys[i].getSprite();
-		game.baddylayer.add(baddysprites[i]);
-		baddysprites[i].hide();
+		
+		sprite = baddys[i].getSprite();
+	
+		// this could be the health indicator.
+		var rangeCircle = new Kinetic.Circle({
+				x: (game.settings.gridSquares/2) ,
+				y: (game.settings.gridSquares/2) ,
+        radius:(game.settings.gridSquares/2),
+        fill: 'red',
+				opacity: 0.5,
+      });
+		rangeCircle.hide();
+		group = new k.Group({
+			x: baddys[i].posX,
+			y: baddys[i].posY,
+			width: game.settings.gridSquares,
+			height: game.settings.gridSquares,
+		});
+		
+		group.add(sprite);
+		group.add(rangeCircle);
+		game.baddylayer.add(group);
+		group.hide();
+		baddysprites[i] = group;
+		
 	}
 
 	/* testing Towers from level.js */
@@ -34,16 +56,11 @@ require(['kinetic','game-settings', 'map', 'baddy', 'tower','utility', 'level','
 			// Bullet start position.
 	    this.x = x + (game.settings.gridSquares / 2);
 	    this.y = y + (game.settings.gridSquares / 2);
+
+			var velocity = utility.getVelocity(this.x, this.y, destinationX, destinationY, speed);
+	  	this.velX = velocity.x;
+			this.velY = velocity.y;
 			
-			// Bullet Destinaton.
-	    var targetX = destinationX - this.x,
-	        targetY = destinationY - this.y,
-	        distance = Math.sqrt(targetX * targetX + targetY * targetY);
-			
-			// Bullet Velocity.
-	    this.velX = (targetX / distance) * speed;
-	    this.velY = (targetY / distance) * speed;
-	  
 	    this.projectile = new Kinetic.Image({
 		          x: this.x,
 		          y: this.y,
@@ -52,8 +69,6 @@ require(['kinetic','game-settings', 'map', 'baddy', 'tower','utility', 'level','
 		          height: 3,
 		        });
 		
-	 
-	
 	    this.draw = function (index) {
 				// check if bullet hit target.
 					
@@ -75,7 +90,7 @@ require(['kinetic','game-settings', 'map', 'baddy', 'tower','utility', 'level','
 	}
 	
 	function fireBullet(bx, by, x, y, damage, speed) {
-	   bullet = new Bullet(bx +(game.settings.gridSquares/2), by+(game.settings.gridSquares/2) , x, y, damage, speed);
+	   bullet = new Bullet(bx , by , x, y, damage, speed);
 	   game.bulletlayer.add(bullet.projectile);
 	   bullets.push(bullet);
 	}
@@ -90,9 +105,9 @@ require(['kinetic','game-settings', 'map', 'baddy', 'tower','utility', 'level','
 		}
 	}, game.bulletlayer);
 	
-// Main animation loop.
-bullanim.start();
+	bullanim.start();
 	
+// Main animation loop.
 	var animatingcount = 0; //incrementer for the number of baddys in the animating array;
 	var pace = 1; //incrementer for spacing out the baddys.
 	
@@ -115,7 +130,7 @@ bullanim.start();
 							ui.updateScore(baddys[i].bounty);
 						}
 						// the baddy is at the end of the path or dead. remove it from the stage and array;
-						baddysprites[i].stop();
+						baddysprites[i].children[0].stop();
 						baddysprites[i].remove();
 						baddysprites.splice(i,1);
 						baddys.splice(i,1);
@@ -124,7 +139,7 @@ bullanim.start();
 					} else {
 						// the baddy is in play, animate baddy.
 						if (baddysprites[i].getVisible() == false) {
-							baddysprites[i].start();
+							baddysprites[i].children[0].start();
 							baddysprites[i].show();
 						}
 						coords = baddys[i].moveBaddy();
@@ -141,7 +156,7 @@ bullanim.start();
 					this.stop();
 			}
 	
-			if(animatingcount < baddys.length && time >= pace * 1000) {
+			if(animatingcount < baddys.length && time >= pace * 2000) {
 				pace++;
 				animatingcount++;
 			}
@@ -151,15 +166,18 @@ bullanim.start();
 		// function to check range and shoot baddys.
 		function assultBaddys(index, time) {
 			//check if baddys in range.
-			baddyX = baddysprites[index].getX();
-			baddyY = baddysprites[index].getY();
-			
+			baddyX = baddysprites[index].getX() + baddysprites[index].getWidth() / 2;
+			baddyY = baddysprites[index].getY() + baddysprites[index].getHeight() / 2;
+			baddyR = baddysprites[index].children[1].getRadius();
+			console.log(baddyR);
 			Towers = level.towers;
 			if(Towers.length > 0) {
 				for(k=0; k < Towers.length; k++) {
-					if(Towers[k].inRange(baddysprites[index]) && (time - Towers[k].lastShot > Towers[k].fireSpeed  || Towers[k].lastShot == 0)){
+
+					if( utility.isInCircle(baddyX, baddyY, Towers[k].posX + (Towers[k].width/2), Towers[k].posY+(Towers[k].height/2), baddyR, Towers[k].range) 
+					&& (time - Towers[k].lastShot > Towers[k].fireSpeed  || Towers[k].lastShot == 0) ) {
 						Towers[k].lastShot = time;
-						fireBullet(baddyX, baddyY,Towers[k].posX, Towers[k].posY, Towers[k].damage, 6); 
+						fireBullet(baddyX, baddyY,Towers[k].posX, Towers[k].posY, Towers[k].damage, 5); 
 					}
 				}
 			}
@@ -170,10 +188,11 @@ bullanim.start();
 		function bulletCollisions(index) {
 			if (bullets.length > 0) {
 		   	for (var i = 0; i < bullets.length; i++) {
-					baddyX = game.baddylayer.children[index].getX();
-					baddyY = game.baddylayer.children[index].getY();
+					baddyX = game.baddylayer.children[index].getX() + game.baddylayer.children[index].getWidth() / 2;
+					baddyY = game.baddylayer.children[index].getY() + game.baddylayer.children[index].getWidth() / 2;
+					baddyR = game.baddylayer.children[index].children[1].getRadius();
 					//check for bullet collisions.
-				 	if(utility.isInCircle(bullets[i].x, bullets[i].y, baddyX, baddyY, game.settings.gridSquares/1.9)) {
+				 	if( utility.isInCircle(bullets[i].x+1, bullets[i].y+1, baddyX, baddyY, baddyR, 1) ) {
 					 		bullets[i].hitTarget = true;
 							baddys[index].hitPoints -= bullets[i].damage;
 							bullets[i].draw(i);

@@ -1,14 +1,16 @@
 define(['kinetic', 'map', 'game-settings', 'utility'], function(k, map, game, utility) {
 	var tower = function (settings) {
+		
+		this.id = utility.getId(); 
 		this.posX = settings.posX || 10;
 		this.posY = settings.posY || 10;
 		this.height = game.settings.gridSquares;
 		this.width = game.settings.gridSquares;
 		this.name = settings.name || 'basic';
-		this.range = settings.range || 2;
+		this.range = settings.range*(game.settings.gridSquares/2) || 2*(game.settings.gridSquares/2);
 		this.damage = settings.damage || 3;
 		this.level = settings.level || 0;
-		this.fireSpeed = settings.speed || 800;
+		this.fireSpeed = settings.speed || 1000;
 		this.cost = settings.cost || 80;
 	}
 
@@ -16,40 +18,15 @@ define(['kinetic', 'map', 'game-settings', 'utility'], function(k, map, game, ut
 		bullets: new Array(),
 		lastShot: 0,
 		getRangeIndicator: function () {
-			var layer = game.baddylayer;
 			var rangeCircle = new Kinetic.Circle({
-	        x: this.posX + (width/2),
-	        y: this.posY + (height/2),
-	        radius: this.range * game.settings.gridSquares,
-	        fill: 'red',
+	        x: this.posX + (this.width/2),
+	        y: this.posY + (this.height/2),
+	        radius: this.range,
+	        fill: 'blue',
+					opacity: 0.5,
 	      });
 			return rangeCircle;
 	},		
-	
-	inRange: function(baddy) {
-		var bX = baddy.getX();
-		var bY = baddy.getY();
-		var delta = game.settings.gridSquares;
-		var offset = (game.settings.gridSquares/2);
-		var radius = this.range * offset;
-		var centerX = this.posX + offset;
-		var centerY = this.posY + offset;
-		
-		if(utility.isInCircle(bX, bY+delta, centerX, centerY, radius) ) {
-			return true;
-		}
-		else if(utility.isInCircle(bX+delta, bY+delta, centerX, centerY, radius) ) {
-			return true;
-		}
-		else if(utility.isInCircle(bX+delta, bY, centerX, centerY, radius) ) {
-			return true;
-		}
-		else if(utility.isInCircle(bX, bY, centerX, centerY, radius) ) {
-			return true;
-		}
-		return false;
-		
-	},
 	getSprite: function () {
 		var animations = {
 			bouncing: [{

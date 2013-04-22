@@ -1,11 +1,11 @@
-define(['kinetic', 'game-settings', 'map'], function(k, game, map) {
+define(['kinetic', 'game-settings', 'map', 'utility'], function(k, game, map, utility) {
 	
 		baddy = function (settings) {
 			var map = settings.map;
 			this.layer = game.layer;
 			this.map = map;
-			this.posX = settings.posX || map.spawnX*game.settings.gridSquares;
-			this.posY = settings.posY || map.spawnY*game.settings.gridSquares;
+			this.posX = settings.posX || map.spawnX * game.settings.gridSquares;
+			this.posY = settings.posY || map.spawnY * game.settings.gridSquares;
 			this.sizeH = settings.sizeH || 1;
 			this.sizeW = settings.sizeW || 1;
 			this.height = game.settings.gridSquares * this.sizeH;
@@ -19,8 +19,6 @@ define(['kinetic', 'game-settings', 'map'], function(k, game, map) {
 			
 		baddy.prototype = {
 			currNode: 0,
-			velocityX:0,
-			velocityY:0,
 			dead: false,
 			endpath:false,
 			getSprite: function() {
@@ -65,8 +63,8 @@ define(['kinetic', 'game-settings', 'map'], function(k, game, map) {
 				
 				var imageObj = new Image();
 				badguy = new k.Sprite({
-		        	x: this.posX, 
-							y: this.posY,
+							width: game.settings.gridSquares,
+							height: game.settings.gridSquares,
 		          image: imageObj,
 		          animation: 'bouncing',
 		          animations: animations,
@@ -75,35 +73,30 @@ define(['kinetic', 'game-settings', 'map'], function(k, game, map) {
 		    });
 			
 				imageObj.src = 'sprites/test_ball.png';
+				
+		
 		  	return badguy;
 			},
 			
 			//Move the enemy along path.	
 			moveBaddy: function() {
-
 				if(this.currNode == 0) {
 					this.currNode = 1;
-					this.posX = map.path[this.currNode][0]*game.settings.gridSquares;
-					this.posY = map.path[this.currNode][1]*game.settings.gridSquares;
 				}
 				var vX = this.posX - map.path[this.currNode+1][0] * game.settings.gridSquares;
 				var vY = this.posY - map.path[this.currNode+1][1] * game.settings.gridSquares;
-
+				
+				var dx = map.path[this.currNode+1][0] * game.settings.gridSquares;
+				var dy = map.path[this.currNode+1][1] * game.settings.gridSquares;
+				
+				vel = utility.getVelocity(this.posX, this.posY, dx, dy, this.speed);
+			
 				if(Math.abs(vX) <= this.speed && Math.abs(vY) <= this.speed) {
 					this.currNode++;
 				}
-
-				this.velocityX = 0;
-				this.velocityY = 0;
-				var direction = Math.round(Math.random()) ;
 				
-				if (vX > 0) {	this.velocityX = -1;}
-				if (vX < 0) {	this.velocityX = 1;}
-				if (vY > 0) {	this.velocityY = -1;}
-				if (vY < 0) {	this.velocityY = 1;}
-
-				this.posX += this.velocityX * this.speed;
-				this.posY += this.velocityY * this.speed;
+				this.posX += vel.x;
+				this.posY += vel.y;
 				
 				if(this.hitPoints < 0) {
 					this.dead = true;
@@ -112,7 +105,7 @@ define(['kinetic', 'game-settings', 'map'], function(k, game, map) {
 					this.endpath = true;
 				}
 				
-				return{x:this.posX, y:this.posY};
+				return{x: this.posX, y: this.posY};
 			}
 			
 			
